@@ -1,6 +1,6 @@
 ﻿/* ----------------------------------------------------------------------------
-Kernel Klink - an object file linker
-Copyright (C) 1997-2018  George E Greaney
+Origami Win32 Library
+Copyright (C) 1998-2018  George E Greaney
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,12 +22,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Klink
+namespace Origami.Win32
 {
-    class Program
+    public class ImportTable
     {
-        static void Main(string[] args)
-        {
-        }
     }
 }
