@@ -1,2 +1,2 @@
-# Kernel-Klink
-an object file linker
+# Cufflink
+an COFF object file linker
