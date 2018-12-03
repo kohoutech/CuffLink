@@ -1,2 +1,2 @@
 # Cufflink
-an COFF object file linker
+a COFF object file linker
