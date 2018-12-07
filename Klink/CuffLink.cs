@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Kernel Klink - an object file linker
+Cufflink - an COFF object file linker
 Copyright (C) 1997-2018  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -22,12 +22,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Klink
+namespace CuffLink
 {
-    class Klink
+    class CuffLink
     {
+        Options options;
+
         static void Main(string[] args)
         {
+            Options options = new Options(args);        //parse the cmd line args
+
+            CuffLink linker = new CuffLink(options);        //create a linker
+            linker.link();
+
         }
+
+        public CuffLink(Options _options)
+        {
+           options = _options;
+        }
+
+        public void link()
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }
