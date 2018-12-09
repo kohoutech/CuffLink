@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CuffLink", "Klink\CuffLink.csproj", "{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CuffLink", "CuffLink\CuffLink.csproj", "{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

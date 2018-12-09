@@ -22,11 +22,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Origami.Win32;
+
 namespace CuffLink
 {
     class CuffLink
     {
         Options options;
+        List<Win32Obj> objfiles;
 
         static void Main(string[] args)
         {
@@ -34,18 +37,24 @@ namespace CuffLink
 
             CuffLink linker = new CuffLink(options);        //create a linker
             linker.link();
-
         }
+
+        //---------------------------------------------------------------------
 
         public CuffLink(Options _options)
         {
-           options = _options;
+            options = _options;
+
+            objfiles = new List<Win32Obj>();
         }
 
         public void link()
         {
-            throw new NotImplementedException();
+            foreach (String filename in options.infilenames)
+            {
+                Win32Obj objfile = Win32Obj.readFromFile(filename);
+                objfiles.Add(objfile);
+            }
         }
-
     }
 }

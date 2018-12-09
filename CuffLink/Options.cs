@@ -27,7 +27,7 @@ namespace CuffLink
 {
     public class Options
     {
-        public List<String> filenames;
+        public List<String> infilenames;
 
         public List<String> searchPaths;
 
@@ -58,7 +58,7 @@ namespace CuffLink
 
         public void setDefaultValues()
         {
-            filenames = new List<string>();
+            infilenames = new List<string>();
             searchPaths = new List<string>();
         }
 
@@ -70,7 +70,7 @@ namespace CuffLink
             String[] lines = File.ReadAllLines(filename);
             foreach (String line in lines)
             {
-                String[] lineargs = line.Split(sep);
+                String[] lineargs = line.Trim().Split(sep);
                 args.AddRange(lineargs);
             }
             return args;
@@ -106,7 +106,7 @@ namespace CuffLink
                 }
                 else
                 {
-                    filenames.Add(args[i]);
+                    infilenames.Add(args[i]);
                 }
             }
         }

@@ -21,8 +21,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 
 //win32 obj files
+//https://docs.microsoft.com/en-us/windows/desktop/debug/pe-format
+
 //https://en.wikibooks.org/wiki/X86_Disassembly/Windows_Executable_Files
 
 
@@ -32,23 +35,27 @@ namespace Origami.Win32
     {
         public String filename;
 
-        public Win32Obj() : base()
+        public Win32Obj(String _filename) : base()
         {
-            filename = null;
+            filename = _filename;
         }
 
 //- reading in ----------------------------------------------------------------
 
-        public void readFromFile(String _filename)
+        public static Win32Obj readFromFile(String filename)
         {
-            filename = _filename;
+            Win32Obj objfile = null;
+            if (File.Exists(filename))
+            {
+                objfile = new Win32Obj(filename);
+                SourceFile source = new SourceFile(filename);
 
-            SourceFile source = new SourceFile(filename);
-
-            readCoffHeader(source);
-            loadSections(source);
-            loadReloctionTable(source);
-            loadStringTable(source);
+                objfile.readCoffHeader(source);
+                objfile.loadSections(source);
+                //objfile.loadReloctionTable(source);
+                objfile.loadStringTable(source);
+            }
+            return objfile;
         }
 
 //- writing out ---------------------------------------------------------------
@@ -95,6 +102,4 @@ namespace Origami.Win32
             outfile.writeOut();
         }
     }
-
-
 }
