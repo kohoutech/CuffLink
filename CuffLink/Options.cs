@@ -30,6 +30,7 @@ namespace CuffLink
         public List<String> infilenames;
 
         public List<String> searchPaths;
+        public List<String> objfiles;
 
         public Options(string[] cmdArgs)
         {
@@ -109,6 +110,13 @@ namespace CuffLink
                     infilenames.Add(args[i]);
                 }
             }
+        }
+
+        //---------------------------------------------------------------------
+
+        public void setLinkerOptions(Origami.Link32.Linker linker)
+        {
+            throw new NotImplementedException();
         }
     }
 }

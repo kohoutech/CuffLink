@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Cufflink - an COFF object file linker
+Origami Lin32 Library
 Copyright (C) 1997-2019  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -22,21 +22,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Origami.Link32;
+using Origami.Win32;
 
-namespace CuffLink
+namespace Origami.Link32
 {
-    class CuffLink
+    public class Linker
     {
-        static void Main(string[] args)
+        public void loadObjectFiles(List<string> list)
         {
-            Options options = new Options(args);        //parse the cmd line args
+            throw new NotImplementedException();
+        }
 
-            Linker linker = new Linker();               //create a linker
-            options.setLinkerOptions(linker);           //set cmd line switches
-            linker.loadObjectFiles(options.objfiles);   //load the source files
-            linker.link();                              //link them together
-            linker.writeExecutableFile();               //and write out the exe file
+        public void link()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void writeExecutableFile()
+        {
+            throw new NotImplementedException();
         }
     }
 }
