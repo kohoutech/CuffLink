@@ -30,13 +30,13 @@ namespace CuffLink
     {
         static void Main(string[] args)
         {
-            Options options = new Options(args);        //parse the cmd line args
+            Options options = new Options(args);                //parse the cmd line args
 
-            Linker linker = new Linker();               //create a linker
-            options.setLinkerOptions(linker);           //set cmd line switches
-            linker.loadObjectFiles(options.objfiles);   //load the source files
-            linker.link();                              //link them together
-            linker.writeExecutableFile();               //and write out the exe file
+            Linker linker = new Linker();                       //create a linker
+            options.setLinkerOptions(linker);                   //set cmd line switches
+            linker.loadObjectFiles(options.objfiles);           //load the source files
+            linker.link();                                      //link them together
+            linker.writeExecutableFile(options.exename);        //and write out the exe file
         }
     }
 }

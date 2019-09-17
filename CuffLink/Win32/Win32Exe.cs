@@ -28,11 +28,25 @@ using System.Text;
 
 namespace Origami.Win32
 {
-    public class Win32Exe : Win32Coff
+    public class Win32Exe
     {
         public String filename;
 
         public MsDosHeader dosHeader;
+
+        const int IMAGE_FILE_MACHINE_I386 = 0x14c;
+
+        //coff header fields
+        public int machine;
+        public int sectionCount;
+        public uint timeStamp;
+        public uint symbolTblAddr;
+        public uint symbolCount;
+        public int optionalHdrSize;
+        public int characteristics;
+
+        public List<Section> sections;
+        public List<CoffSymbol> symbolTbl;
 
         //optional header fields
         public uint magicNum;
@@ -89,7 +103,7 @@ namespace Origami.Win32
         public ImportTable importTable;
         public ResourceTable resourceTable;
 
-        public Win32Exe() : base()
+        public Win32Exe()
         {
             filename = null;
 
@@ -153,80 +167,80 @@ namespace Origami.Win32
 
 //- reading in ----------------------------------------------------------------
 
-        public void readFile(String _filename)
-        {
-            filename = _filename;
+        //public void readFile(String _filename)
+        //{
+        //    filename = _filename;
 
-            SourceFile source = new SourceFile(filename);
+        //    SourceFile source = new SourceFile(filename);
 
-            dosHeader = MsDosHeader.readMSDOSHeader(source);
-            source.seek(dosHeader.e_lfanew);
-            uint pesig = source.getFour();
-            if (pesig != 0x00004550)
-            {
-                throw new Win32ReadException("this is not a valid win32 executable file");
-            }
+        //    dosHeader = MsDosHeader.readMSDOSHeader(source);
+        //    source.seek(dosHeader.e_lfanew);
+        //    uint pesig = source.getFour();
+        //    if (pesig != 0x00004550)
+        //    {
+        //        throw new Win32ReadException("this is not a valid win32 executable file");
+        //    }
 
-            readCoffHeader(source);
-            readOptionalHeader(source);
-            loadSections(source);
-            foreach (Section section in sections)
-            {
-                section.imageBase = imageBase;          //sections in exe/dll have an image base
-            }
-            //getResourceTable(source);
-        }
+        //    readCoffHeader(source);
+        //    readOptionalHeader(source);
+        //    loadSections(source);
+        //    foreach (Section section in sections)
+        //    {
+        //        section.imageBase = imageBase;          //sections in exe/dll have an image base
+        //    }
+        //    //getResourceTable(source);
+        //}
 
-        private void readOptionalHeader(SourceFile source)
-        {
-            magicNum = source.getTwo();
-            majorLinkerVersion = source.getOne();
-            minorLinkerVersion = source.getOne();
-            sizeOfCode = source.getFour();
-            sizeOfInitializedData = source.getFour();
-            sizeOfUninitializedData = source.getFour();
-            addressOfEntryPoint = source.getFour();
-            baseOfCode = source.getFour();
-            baseOfData = source.getFour();
-            imageBase = source.getFour();
-            sectionAlignment = source.getFour();
-            fileAlignment = source.getFour();
-            majorOSVersion = source.getTwo();
-            minorOSVersion = source.getTwo();
-            majorImageVersion = source.getTwo();
-            minorImageVersion = source.getTwo();
-            majorSubsystemVersion = source.getTwo();
-            minorSubsystemVersion = source.getTwo();
-            win32VersionValue = source.getFour();
-            sizeOfImage = source.getFour();
-            sizeOfHeaders = source.getFour();
-            checksum = source.getFour();
-            subsystem = source.getTwo();
-            dLLCharacteristics = source.getTwo();
-            sizeOfStackReserve = source.getFour();
-            sizeOfStackCommit = source.getFour();
-            sizeOfHeapReserve = source.getFour();
-            sizeOfHeapCommit = source.getFour();
-            loaderFlags = source.getFour();
-            numberOfRvaAndSizes = source.getFour();
+        //private void readOptionalHeader(SourceFile source)
+        //{
+        //    magicNum = source.getTwo();
+        //    majorLinkerVersion = source.getOne();
+        //    minorLinkerVersion = source.getOne();
+        //    sizeOfCode = source.getFour();
+        //    sizeOfInitializedData = source.getFour();
+        //    sizeOfUninitializedData = source.getFour();
+        //    addressOfEntryPoint = source.getFour();
+        //    baseOfCode = source.getFour();
+        //    baseOfData = source.getFour();
+        //    imageBase = source.getFour();
+        //    sectionAlignment = source.getFour();
+        //    fileAlignment = source.getFour();
+        //    majorOSVersion = source.getTwo();
+        //    minorOSVersion = source.getTwo();
+        //    majorImageVersion = source.getTwo();
+        //    minorImageVersion = source.getTwo();
+        //    majorSubsystemVersion = source.getTwo();
+        //    minorSubsystemVersion = source.getTwo();
+        //    win32VersionValue = source.getFour();
+        //    sizeOfImage = source.getFour();
+        //    sizeOfHeaders = source.getFour();
+        //    checksum = source.getFour();
+        //    subsystem = source.getTwo();
+        //    dLLCharacteristics = source.getTwo();
+        //    sizeOfStackReserve = source.getFour();
+        //    sizeOfStackCommit = source.getFour();
+        //    sizeOfHeapReserve = source.getFour();
+        //    sizeOfHeapCommit = source.getFour();
+        //    loaderFlags = source.getFour();
+        //    numberOfRvaAndSizes = source.getFour();
 
-            dExportTable = DataDirectory.readDataDirectory(source);
-            dImportTable = DataDirectory.readDataDirectory(source);
-            dResourceTable = DataDirectory.readDataDirectory(source);
-            exceptionTable = DataDirectory.readDataDirectory(source);
-            certificatesTable = DataDirectory.readDataDirectory(source);
-            baseRelocationTable = DataDirectory.readDataDirectory(source);
-            debugTable = DataDirectory.readDataDirectory(source);
-            architecture = DataDirectory.readDataDirectory(source);
-            globalPtr = DataDirectory.readDataDirectory(source);
-            threadLocalStorageTable = DataDirectory.readDataDirectory(source);
-            loadConfigurationTable = DataDirectory.readDataDirectory(source);
-            boundImportTable = DataDirectory.readDataDirectory(source);
-            importAddressTable = DataDirectory.readDataDirectory(source);
-            delayImportDescriptor = DataDirectory.readDataDirectory(source);
-            CLRRuntimeHeader = DataDirectory.readDataDirectory(source);
-            reserved = DataDirectory.readDataDirectory(source);
-        }
+        //    dExportTable = DataDirectory.readDataDirectory(source);
+        //    dImportTable = DataDirectory.readDataDirectory(source);
+        //    dResourceTable = DataDirectory.readDataDirectory(source);
+        //    exceptionTable = DataDirectory.readDataDirectory(source);
+        //    certificatesTable = DataDirectory.readDataDirectory(source);
+        //    baseRelocationTable = DataDirectory.readDataDirectory(source);
+        //    debugTable = DataDirectory.readDataDirectory(source);
+        //    architecture = DataDirectory.readDataDirectory(source);
+        //    globalPtr = DataDirectory.readDataDirectory(source);
+        //    threadLocalStorageTable = DataDirectory.readDataDirectory(source);
+        //    loadConfigurationTable = DataDirectory.readDataDirectory(source);
+        //    boundImportTable = DataDirectory.readDataDirectory(source);
+        //    importAddressTable = DataDirectory.readDataDirectory(source);
+        //    delayImportDescriptor = DataDirectory.readDataDirectory(source);
+        //    CLRRuntimeHeader = DataDirectory.readDataDirectory(source);
+        //    reserved = DataDirectory.readDataDirectory(source);
+        //}
 
         //private void getResourceTable(SourceFile source)
         //{

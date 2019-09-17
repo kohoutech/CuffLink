@@ -38,9 +38,10 @@ namespace Origami.Link32
             throw new NotImplementedException();
         }
 
-        public void writeExecutableFile()
+        public void writeExecutableFile(String exename)
         {
-            throw new NotImplementedException();
+            Win32Exe exefile = new Win32Exe();
+            exefile.writeFile(exename);
         }
     }
 }
