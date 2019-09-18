@@ -45,9 +45,6 @@ namespace Origami.Win32
         public int optionalHdrSize;
         public int characteristics;
 
-        public List<Section> sections;
-        public List<CoffSymbol> symbolTbl;
-
         //optional header fields
         public uint magicNum;
         public uint majorLinkerVersion;
@@ -98,6 +95,8 @@ namespace Origami.Win32
         public DataDirectory CLRRuntimeHeader;
         public DataDirectory reserved;
 
+        public List<Section> sections;
+
         //standard sections
         public ExportTable exportTable;
         public ImportTable importTable;
@@ -108,6 +107,15 @@ namespace Origami.Win32
             filename = null;
 
             dosHeader = null;
+
+            //coff header fields
+            machine = IMAGE_FILE_MACHINE_I386;
+            sectionCount = 0;
+            timeStamp = 0;
+            symbolTblAddr = 0;
+            symbolCount = 0;
+            optionalHdrSize = 0;
+            characteristics = 0;
 
             //optional header fields
             magicNum = 0;
@@ -158,6 +166,8 @@ namespace Origami.Win32
             delayImportDescriptor = null;
             CLRRuntimeHeader = null;
             reserved = null;
+
+            sections = new List<Section>();
 
             //standard sections
             exportTable = null;

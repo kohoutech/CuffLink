@@ -28,90 +28,50 @@ namespace Origami.Win32
 {
     public class Section
     {
-        //section flag constants
-        public const uint IMAGE_SCN_TYPE_NO_PAD = 0x00000008;
 
-        public const uint IMAGE_SCN_CNT_CODE = 0x00000020;
-        public const uint IMAGE_SCN_CNT_INITIALIZED_DATA = 0x00000040;
-        public const uint IMAGE_SCN_CNT_UNINITIALIZED_DATA = 0x00000080;
-        public const uint IMAGE_SCN_LNK_OTHER = 0x00000100;
-        public const uint IMAGE_SCN_LNK_INFO = 0x00000200;
-        public const uint IMAGE_SCN_LNK_REMOVE = 0x00000800;
-        public const uint IMAGE_SCN_LNK_COMDAT = 0x00001000;
-        public const uint IMAGE_SCN_NO_DEFER_SPEC_EXC = 0x00004000;
-        public const uint IMAGE_SCN_GPREL = 0x00008000;
-
-        public const uint IMAGE_SCN_MEM_PURGEABLE = 0x00020000;
-        public const uint IMAGE_SCN_MEM_LOCKED = 0x00040000;
-        public const uint IMAGE_SCN_MEM_PRELOAD = 0x00080000;
-
-        //valid only for object files
-        public const uint IMAGE_SCN_ALIGN_1BYTES = 0x00100000;
-        public const uint IMAGE_SCN_ALIGN_2BYTES = 0x00200000;
-        public const uint IMAGE_SCN_ALIGN_4BYTES = 0x00300000;
-        public const uint IMAGE_SCN_ALIGN_8BYTES = 0x00400000;
-        public const uint IMAGE_SCN_ALIGN_16BYTES = 0x00500000;
-        public const uint IMAGE_SCN_ALIGN_32BYTES = 0x00600000;
-        public const uint IMAGE_SCN_ALIGN_64BYTES = 0x00700000;
-        public const uint IMAGE_SCN_ALIGN_128BYTES = 0x00800000;
-        public const uint IMAGE_SCN_ALIGN_256BYTES = 0x00900000;
-        public const uint IMAGE_SCN_ALIGN_512BYTES = 0x00A00000;
-        public const uint IMAGE_SCN_ALIGN_1024BYTES = 0x00B00000;
-        public const uint IMAGE_SCN_ALIGN_2048BYTES = 0x00C00000;
-        public const uint IMAGE_SCN_ALIGN_4096BYTES = 0x00D00000;
-        public const uint IMAGE_SCN_ALIGN_8192BYTES = 0x00E00000;
-
-        public const uint IMAGE_SCN_LNK_NRELOC_OVFL = 0x01000000;
-        public const uint IMAGE_SCN_MEM_DISCARDABLE = 0x02000000;
-        public const uint IMAGE_SCN_MEM_NOT_CACHED = 0x04000000;
-        public const uint IMAGE_SCN_MEM_NOT_PAGED = 0x08000000;
-
-        public const uint IMAGE_SCN_MEM_SHARED = 0x10000000;
-        public const uint IMAGE_SCN_MEM_EXECUTE = 0x20000000;
-        public const uint IMAGE_SCN_MEM_READ = 0x40000000;
-        public const uint IMAGE_SCN_MEM_WRITE = 0x80000000;
-
-//section header fields
+        //section header fields
         public int secNum;
-        public String secName;
+        public String name;
 
         public uint memloc;                 //section addr in memory
         public uint memsize;                //section size in memory
         public uint fileloc;                //section addr in file
         public uint filesize;               //section size in file
 
-        public uint pRelocations;
-        public int relocCount;
-        public uint pLinenums;              //line num data is deprecated
-        public int linenumCount;
+        public List<CoffRelocation> relocations;
+        public List<CoffLineNumber> linenumbers;                //line num data is deprecated
 
-        public uint flags;
+        //flag fields
+        public bool hasCode;
+        public bool hasInitializedData;
+        public bool hasUninitializedData;
+        public bool hasInfo;
+        public bool isRemoveable;
+        public bool hasComdat;
+        public bool resetSpecExcept;
+        public bool hasGlobalPtrData;
 
         public uint imageBase;
         public byte[] data;
 
-        public List<CoffReloc> relocTbl;
-
         //new section cons
-        public Section()
+        public Section(String _name)
         {
             secNum = 0;
-            secName = "";
+            name = _name;
 
             memsize = 0;
             memloc = 0;
             filesize = 0;
             fileloc = 0;
 
-            pRelocations = 0;
-            pLinenums = 0;
-            relocCount = 0;
-            linenumCount = 0;
+            relocations = new List<CoffRelocation>();
+            linenumbers = new List<CoffLineNumber>();
 
             flags = 0;
             imageBase = 0;
             data = new byte[0];
-            relocTbl = new List<CoffReloc>();
+            relocTbl = new List<CoffRelocation>();
         }
 
         //loaded section cons
@@ -119,7 +79,7 @@ namespace Origami.Win32
             uint _pRelocations, uint _pLinenums, int _relocCount, int _linenumCount, uint _flags)
         {
             this.secNum = _secnum;
-            this.secName = _secname;
+            this.name = _secname;
 
             this.memsize = _memsize;
             this.memloc = _memloc;
@@ -134,7 +94,7 @@ namespace Origami.Win32
             this.flags = _flags;
             this.imageBase = 0;
             data = new byte[0];
-            relocTbl = new List<CoffReloc>();
+            relocTbl = new List<CoffRelocation>();
         }
 
         internal void setData(byte[] _data)
@@ -142,7 +102,7 @@ namespace Origami.Win32
             data = _data;
         }
 
-        internal void addReloc(CoffReloc reloc)
+        internal void addReloc(CoffRelocation reloc)
         {
             relocTbl.Add(reloc);
         }
@@ -190,7 +150,7 @@ namespace Origami.Win32
         {
 
             Section section = new Section();
-            section.secName = source.getAsciiString(8);
+            section.name = source.getAsciiString(8);
 
             section.memsize = source.getFour();
             section.memloc = source.getFour();
@@ -215,7 +175,7 @@ namespace Origami.Win32
 
         internal void writeSectionTblEntry(OutputFile outfile)
         {
-            outfile.putFixedString(secName, 8);
+            outfile.putFixedString(name, 8);
 
             outfile.putFour(memsize);
             outfile.putFour(memloc);
@@ -245,7 +205,7 @@ namespace Origami.Win32
 
 //-----------------------------------------------------------------------------
 
-    public class CoffReloc
+    public class CoffRelocation
     {
         public enum Reloctype
         {
@@ -263,7 +223,7 @@ namespace Origami.Win32
         public uint symTblIdx;
         public Reloctype type;
 
-        public CoffReloc(uint _addr, uint _idx, Reloctype _type)
+        public CoffRelocation(uint _addr, uint _idx, Reloctype _type)
         {
             address = _addr;
             symTblIdx = _idx;
@@ -276,5 +236,9 @@ namespace Origami.Win32
             outfile.putFour(symTblIdx);
             outfile.putTwo((uint)type);            
         }
+    }
+
+    public class CoffLineNumber
+    {
     }
 }
