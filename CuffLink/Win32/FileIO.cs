@@ -130,18 +130,21 @@ namespace Origami.Win32
 
     public class OutputFile
     {
+        uint INITIAL_SIZE = 0x200;
         String filename;
         byte[] outbuf;
         uint outlen;
         uint outpos;
+        uint maxlen;
 
         //for writing fields to a disk file
-        public OutputFile(String _filename, uint size)
+        public OutputFile(String _filename)
         {
             filename = _filename;
-            outlen = size;
+            outlen = INITIAL_SIZE;
             outbuf = new byte[outlen];
             outpos = 0;
+            maxlen = 0;
         }
 
         public uint getPos()

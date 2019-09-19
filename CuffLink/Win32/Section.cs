@@ -50,8 +50,17 @@ namespace Origami.Win32
         public bool hasComdat;
         public bool resetSpecExcept;
         public bool hasGlobalPtrData;
+        public bool hasExtendRelocs;
+        public bool isDiscardable;
+        public bool notCached;
+        public bool notPaged;
+        public bool isShared;
+        public bool isExecutable;
+        public bool isReadable;
+        public bool isWritable;
 
-        public uint imageBase;
+        public int dataAlignment;
+
         public byte[] data;
 
         //new section cons
@@ -68,80 +77,26 @@ namespace Origami.Win32
             relocations = new List<CoffRelocation>();
             linenumbers = new List<CoffLineNumber>();
 
-            flags = 0;
-            imageBase = 0;
-            data = new byte[0];
-            relocTbl = new List<CoffRelocation>();
-        }
+            hasCode = false;
+            hasInitializedData = false;
+            hasUninitializedData = false;
+            hasInfo = false;
+            isRemoveable = false;
+            hasComdat = false;
+            resetSpecExcept = false;
+            hasGlobalPtrData = false;
+            hasExtendRelocs = false;
+            isExecutable = false;
+            isReadable = false;
+            isWritable = false;
+            isShared = false;
+            isDiscardable = false;
+            notCached = false;
+            notPaged = false;
 
-        //loaded section cons
-        public Section(int _secnum, String _secname, uint _memsize, uint _memloc, uint _filesize, uint _fileloc, 
-            uint _pRelocations, uint _pLinenums, int _relocCount, int _linenumCount, uint _flags)
-        {
-            this.secNum = _secnum;
-            this.name = _secname;
+            dataAlignment = 1;
 
-            this.memsize = _memsize;
-            this.memloc = _memloc;
-            this.filesize = _filesize;
-            this.fileloc = _fileloc;
-
-            this.pRelocations = _pRelocations;
-            this.pLinenums = _pLinenums;
-            this.relocCount = _relocCount;
-            this.linenumCount = _linenumCount;
-
-            this.flags = _flags;
-            this.imageBase = 0;
-            data = new byte[0];
-            relocTbl = new List<CoffRelocation>();
-        }
-
-        internal void setData(byte[] _data)
-        {
-            data = _data;
-        }
-
-        internal void addReloc(CoffRelocation reloc)
-        {
-            relocTbl.Add(reloc);
-        }
-
-//- flag methods --------------------------------------------------------------
-
-        public bool isCode()
-        {
-            return (flags & IMAGE_SCN_CNT_CODE) != 0;
-        }
-
-        public bool isInitializedData()
-        {
-            return (flags & IMAGE_SCN_CNT_INITIALIZED_DATA) != 0;
-        }
-
-        public bool isUninitializedData()
-        {
-            return (flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0;
-        }
-
-        public bool isDiscardable()
-        {
-            return (flags & IMAGE_SCN_MEM_DISCARDABLE) != 0;
-        }
-
-        public bool isExecutable()
-        {
-            return (flags & IMAGE_SCN_MEM_EXECUTE) != 0;
-        }
-
-        public bool isReadable()
-        {
-            return (flags & IMAGE_SCN_MEM_READ) != 0;
-        }
-
-        public bool isWritable()
-        {
-            return (flags & IMAGE_SCN_MEM_WRITE) != 0;
+            data = new byte[0];            
         }
 
 //- reading in ----------------------------------------------------------------
@@ -149,19 +104,36 @@ namespace Origami.Win32
         public static Section loadSection(SourceFile source)
         {
 
-            Section section = new Section();
-            section.name = source.getAsciiString(8);
+            String name = source.getAsciiString(8);
+            Section section = new Section(name);
 
             section.memsize = source.getFour();
             section.memloc = source.getFour();
             section.filesize = source.getFour();
             section.fileloc = source.getFour();
 
-            section.pRelocations = source.getFour();
-            section.pLinenums = source.getFour();
-            section.relocCount = (int)source.getTwo();
-            section.linenumCount = (int)source.getTwo();
-            section.flags = source.getFour();
+            section.relocations = CoffRelocation.load(source);
+            section.linenumbers = CoffLineNumber.load(source);
+
+            uint flags = source.getFour();
+            section.hasCode = (flags & 0x20) != 0;
+            section.hasInitializedData = (flags & 0x40) != 0;
+            section.hasUninitializedData = (flags & 0x80) != 0;
+            section.hasInfo = (flags & 0x200) != 0;
+            section.isRemoveable = (flags & 0x800) != 0;
+            section.hasComdat = (flags & 0x1000) != 0;
+            section.resetSpecExcept = (flags & 0x4000) != 0;
+            section.hasGlobalPtrData = (flags & 0x8000) != 0;
+            section.hasExtendRelocs = (flags & 0x02000000) != 0;
+            section.isDiscardable = (flags & 0x02000000) != 0;
+            section.notCached = (flags & 0x04000000) != 0;
+            section.notPaged = (flags & 0x08000000) != 0;
+            section.isShared = (flags & 0x10000000) != 0;
+            section.isExecutable = (flags & 0x20000000) != 0;
+            section.isReadable = (flags & 0x40000000) != 0;
+            section.isWritable = (flags & 0x80000000) != 0;
+
+            section.dataAlignment = (int)((flags >> 5) % 0x10);
 
             //load section data - read in all the bytes that will be loaded into mem (memsize)
             //and skip the remaining section bytes (filesize) to pad out the data to a file boundary
@@ -172,8 +144,7 @@ namespace Origami.Win32
 
 //- writing out ---------------------------------------------------------------
 
-
-        internal void writeSectionTblEntry(OutputFile outfile)
+        public void writeSectionTblEntry(OutputFile outfile)
         {
             outfile.putFixedString(name, 8);
 
@@ -182,24 +153,32 @@ namespace Origami.Win32
             outfile.putFour(filesize);
             outfile.putFour(fileloc);
 
-            outfile.putFour(pRelocations);
-            outfile.putFour(0);
-            outfile.putTwo((uint)relocTbl.Count);
-            outfile.putTwo(0);
+            CoffRelocation.write(outfile);
+            CoffLineNumber.write(outfile);
 
-            outfile.putFour(flags);
+            uint flags = 0;
+            if (hasCode) flags += 0x20;
+            if (hasInitializedData) flags += 0x40;
+            if (hasUninitializedData) flags += 0x80;
+            if (hasInfo) flags += 0x200;
+            if (isRemoveable) flags += 0x800;
+            if (hasComdat) flags += 0x1000;
+            if (resetSpecExcept) flags += 0x4000;
+            if (hasGlobalPtrData) flags += 0x8000;
+            if (hasExtendRelocs) flags += 0x02000000;
+            if (isDiscardable) flags += 0x02000000;
+            if (notCached) flags += 0x04000000;
+            if (notPaged) flags += 0x08000000;
+            if (isShared) flags += 0x10000000;
+            if (isExecutable) flags += 0x20000000;
+            if (isReadable) flags += 0x40000000;
+            if (isWritable) flags += 0x80000000;
+            flags += (uint)(dataAlignment << 5);
         }
 
-        internal void writeSectionData(OutputFile outfile)
+        public void writeSectionData(OutputFile outfile)
         {
             outfile.putRange(data);
-            if (relocTbl != null)
-            {
-                for (int i = 0; i < relocTbl.Count; i++)
-                {
-                    relocTbl[i].writeToFile(outfile);
-                }
-            }
         }
     }
 
@@ -236,9 +215,28 @@ namespace Origami.Win32
             outfile.putFour(symTblIdx);
             outfile.putTwo((uint)type);            
         }
+
+        public static List<CoffRelocation> load(SourceFile source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void write(OutputFile outfile)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class CoffLineNumber
     {
+        public static List<CoffLineNumber> load(SourceFile source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void write(OutputFile outfile)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

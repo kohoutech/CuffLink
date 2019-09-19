@@ -37,13 +37,9 @@ namespace Origami.Win32
         const int IMAGE_FILE_MACHINE_I386 = 0x14c;
 
         //coff header fields
-        public int machine;
-        public int sectionCount;
+        public uint machine;
         public uint timeStamp;
-        public uint symbolTblAddr;
-        public uint symbolCount;
-        public int optionalHdrSize;
-        public int characteristics;
+        public uint characteristics;
 
         //optional header fields
         public uint magicNum;
@@ -102,6 +98,8 @@ namespace Origami.Win32
         public ImportTable importTable;
         public ResourceTable resourceTable;
 
+        public SymbolTable symbolTable;
+
         public Win32Exe()
         {
             filename = null;
@@ -110,11 +108,7 @@ namespace Origami.Win32
 
             //coff header fields
             machine = IMAGE_FILE_MACHINE_I386;
-            sectionCount = 0;
             timeStamp = 0;
-            symbolTblAddr = 0;
-            symbolCount = 0;
-            optionalHdrSize = 0;
             characteristics = 0;
 
             //optional header fields
@@ -173,6 +167,8 @@ namespace Origami.Win32
             exportTable = null;
             importTable = null;
             resourceTable = null;
+
+            symbolTable = new SymbolTable();
         }
 
 //- reading in ----------------------------------------------------------------
@@ -275,15 +271,47 @@ namespace Origami.Win32
         public void layoutImage()
         {
             dosHeader = new MsDosHeader();
-            dosHeader.e_lfanew = 0x200;
+            dosHeader.e_lfanew = 0x80;
         }
 
         public void writeFile(String filename)
         {
-            OutputFile outfile = new OutputFile(filename, 0x200);
+            OutputFile outfile = new OutputFile(filename);
             dosHeader.writeOut(outfile);
-            outfile.putZeros(0x200 - 0x40);
+            outfile.putZeros(0x80 - 0x40);
+
+            writeCoffHeader(outfile);
+            writeOptionalHeader(outfile);
+            writeSectionTable(outfile);
+            writeSectionData(outfile);
+
             outfile.writeOut();
+        }
+
+        public void writeCoffHeader(OutputFile outfile)
+        {
+            outfile.putFour(0x00004550);            //PE sig
+            outfile.putTwo(machine);
+            outfile.putTwo((uint)sections.Count);
+            outfile.putFour(timeStamp);
+            symbolTable.writeHeader(outfile);
+            outfile.putTwo(0xe0);
+            outfile.putTwo(characteristics);
+        }
+
+        private void writeOptionalHeader(OutputFile outfile)
+        {
+            
+        }
+
+        private void writeSectionTable(OutputFile outfile)
+        {
+            
+        }
+
+        private void writeSectionData(OutputFile outfile)
+        {
+            
         }
     }
 
@@ -415,6 +443,19 @@ namespace Origami.Win32
             }
         }
 
+//- symbol tbl ------------------------------------------------------------
+
+        public class SymbolTable
+        {
+            public uint symTablePtr;
+            public uint symTableCount;
+
+            public void writeHeader(OutputFile outfile)
+            {
+                outfile.putTwo(symTablePtr);
+                outfile.putTwo(symTableCount);
+            }
+        }
 }
 
 //Console.WriteLine("there's no sun in the shadow of the wizard");

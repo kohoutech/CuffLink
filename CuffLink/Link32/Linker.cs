@@ -30,12 +30,12 @@ namespace Origami.Link32
     {
         public void loadObjectFiles(List<string> list)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void link()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public void writeExecutableFile(String exename)
