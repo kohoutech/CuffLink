@@ -41,6 +41,7 @@ namespace Origami.Link32
         public void writeExecutableFile(String exename)
         {
             Win32Exe exefile = new Win32Exe();
+            exefile.layoutImage();
             exefile.writeFile(exename);
         }
     }

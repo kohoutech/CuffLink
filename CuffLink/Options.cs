@@ -57,6 +57,7 @@ namespace CuffLink
             //now parse all options & filenames
             parseOptions(args);
 
+            exename = "test.exe";
         }
 
         public void setDefaultValues()

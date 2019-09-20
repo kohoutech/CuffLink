@@ -131,6 +131,8 @@ namespace Origami.Win32
     public class OutputFile
     {
         uint INITIAL_SIZE = 0x200;
+        uint SIZE_DELTA = 0x2000;
+
         String filename;
         byte[] outbuf;
         uint outlen;
@@ -152,13 +154,26 @@ namespace Origami.Win32
             return outpos;
         }
 
+        public void checkSpace(uint size)
+        {
+            uint needed = outpos + size;
+            if (needed > outbuf.Length)
+            {
+                byte[] temp = new byte[needed + SIZE_DELTA];
+                outbuf.CopyTo(temp, 0);
+                outbuf = temp;
+            }
+        }
+
         public void putOne(uint val)
         {
+            checkSpace(1);
             outbuf[outpos++] = (byte)(val % 0x100);
         }
 
         public void putTwo(uint val)
         {
+            checkSpace(2);
             byte a = (byte)(val % 0x100);
             val /= 0x100;
             byte b = (byte)(val % 0x100);
@@ -168,6 +183,7 @@ namespace Origami.Win32
 
         public void putFour(uint val)
         {
+            checkSpace(4);
             byte d = (byte)(val % 0x100);
             val /= 0x100;
             byte c = (byte)(val % 0x100);
@@ -184,6 +200,7 @@ namespace Origami.Win32
         //asciiz string
         public void putString(String s)
         {
+            checkSpace((uint)(s.Length + 1));
             for (int i = 0; i < s.Length; i++)
             {
                 outbuf[outpos++] = (byte)s[i];
@@ -194,6 +211,7 @@ namespace Origami.Win32
         //fixed len string
         public void putFixedString(String str, int width)
         {
+            checkSpace((uint)width);
             for (int i = 0; i < width; i++)
             {
                 if (i < str.Length)
@@ -210,12 +228,14 @@ namespace Origami.Win32
         public void putRange(byte[] bytes)
         {
             uint len = (uint)bytes.Length;
+            checkSpace(len);
             Array.Copy(bytes, 0, outbuf, outpos, len);
             outpos += len;
         }
 
         public void putZeros(uint len)
         {
+            checkSpace(len);
             for (int i = 0; i < len; i++)
             {
                 outbuf[outpos++] = 0;
@@ -224,6 +244,7 @@ namespace Origami.Win32
 
         public void seek(uint pos)
         {
+            checkSpace(pos - outpos);
             outpos = pos;
         }
 
