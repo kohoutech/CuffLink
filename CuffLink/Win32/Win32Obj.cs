@@ -31,75 +31,75 @@ using System.IO;
 
 namespace Origami.Win32
 {
-    class Win32Obj : Win32Coff
+    class Win32Obj 
     {
         public String filename;
 
-        public Win32Obj(String _filename) : base()
+        public Win32Obj(String _filename)
         {
             filename = _filename;
         }
 
 //- reading in ----------------------------------------------------------------
 
-        public static Win32Obj readFromFile(String filename)
-        {
-            Win32Obj objfile = null;
-            if (File.Exists(filename))
-            {
-                objfile = new Win32Obj(filename);
-                SourceFile source = new SourceFile(filename);
+        //public static Win32Obj readFromFile(String filename)
+        //{
+        //    Win32Obj objfile = null;
+        //    if (File.Exists(filename))
+        //    {
+        //        objfile = new Win32Obj(filename);
+        //        SourceFile source = new SourceFile(filename);
 
-                objfile.readCoffHeader(source);
-                objfile.loadSections(source);
-                //objfile.loadReloctionTable(source);
-                objfile.loadStringTable(source);
-            }
-            return objfile;
-        }
+        //        objfile.readCoffHeader(source);
+        //        objfile.loadSections(source);
+        //        //objfile.loadReloctionTable(source);
+        //        objfile.loadStringTable(source);
+        //    }
+        //    return objfile;
+        //}
 
 //- writing out ---------------------------------------------------------------
 
-        public void writeToFile(String filename)
-        {
-            //layout .obj file 
-            uint filepos = 0x14;                               //coff hdr size
+        //public void writeToFile(String filename)
+        //{
+        //    //layout .obj file 
+        //    uint filepos = 0x14;                               //coff hdr size
 
-            //sections
-            filepos += (uint)sections.Count * 0x28;            //add sec tbl size
-            for (int i = 0; i < sections.Count; i++)            //add section data sizes
-            {
-                if (sections[i].data.Length > 0)
-                {
-                    sections[i].fileloc = filepos;
-                    sections[i].filesize = (uint)(sections[i].data.Length);
-                    filepos += sections[i].filesize;
-                    uint relocsize = (uint)(sections[i].relocCount * 0x0a);
-                    if (relocsize > 0)
-                    {
-                        sections[i].pRelocations = filepos;
-                        filepos += relocsize;
-                    }
-                }
-            }
+        //    //sections
+        //    filepos += (uint)sections.Count * 0x28;            //add sec tbl size
+        //    for (int i = 0; i < sections.Count; i++)            //add section data sizes
+        //    {
+        //        if (sections[i].data.Length > 0)
+        //        {
+        //            sections[i].fileloc = filepos;
+        //            sections[i].filesize = (uint)(sections[i].data.Length);
+        //            filepos += sections[i].filesize;
+        //            uint relocsize = (uint)(sections[i].relocCount * 0x0a);
+        //            if (relocsize > 0)
+        //            {
+        //                sections[i].pRelocations = filepos;
+        //                filepos += relocsize;
+        //            }
+        //        }
+        //    }
 
-            symbolTblAddr = filepos;                           
-            filepos += (uint)symbolTbl.Count * 0x12;           //add symbol tbl size
-            filepos += 0x04;
-            for (int i = 0; i < stringTbl.Count; i++)
-            {
-                filepos += (uint)(stringTbl[i].Length + 1);    //add string tbl size
-            }
+        //    symbolTblAddr = filepos;                           
+        //    filepos += (uint)symbolTbl.Count * 0x12;           //add symbol tbl size
+        //    filepos += 0x04;
+        //    for (int i = 0; i < stringTbl.Count; i++)
+        //    {
+        //        filepos += (uint)(stringTbl[i].Length + 1);    //add string tbl size
+        //    }
 
-            //then write to .obj file
-            OutputFile outfile = new OutputFile(filename, filepos);
-            writeCoffHeader(outfile);
-            writeSectionTable(outfile);
-            writeSectionData(outfile);
-            writeSymbolTable(outfile);
-            writeStringTable(outfile);
+        //    //then write to .obj file
+        //    OutputFile outfile = new OutputFile(filename, filepos);
+        //    writeCoffHeader(outfile);
+        //    writeSectionTable(outfile);
+        //    writeSectionData(outfile);
+        //    writeSymbolTable(outfile);
+        //    writeStringTable(outfile);
 
-            outfile.writeOut();
-        }
+        //    outfile.writeOut();
+        //}
     }
 }

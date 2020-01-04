@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CuffLink.cs" />
-    <Compile Include="Link32\Linker.cs" />
+    <Compile Include="Linker.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Win32\ExportTable.cs" />
@@ -53,9 +53,11 @@
     <Compile Include="Win32\ImportTable.cs" />
     <Compile Include="Win32\ResourceTable.cs" />
     <Compile Include="Win32\Section.cs" />
-    <Compile Include="Win32\Win32Coff.cs" />
     <Compile Include="Win32\Win32Exe.cs" />
     <Compile Include="Win32\Win32Obj.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Link32\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

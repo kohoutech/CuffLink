@@ -22,8 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Origami.Link32;
-
 namespace CuffLink
 {
     class CuffLink
@@ -32,8 +30,8 @@ namespace CuffLink
         {
             Options options = new Options(args);                //parse the cmd line args
 
-            Linker linker = new Linker();                       //create a linker
-            options.setLinkerOptions(linker);                   //set cmd line switches
+            Linker linker = new Linker(options);                       //create a linker
+            
             linker.loadObjectFiles(options.objfiles);           //load the source files
             linker.link();                                      //link them together
             linker.writeExecutableFile(options.exename);        //and write out the exe file

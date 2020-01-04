@@ -24,13 +24,40 @@ using System.Text;
 
 using Origami.Win32;
 
-namespace Origami.Link32
+namespace CuffLink
 {
     public class Linker
     {
-        public void loadObjectFiles(List<string> list)
+        Options options;
+        List<Win32Obj> objFiles;
+        Win32Exe exefile;
+        List<Section> sections;
+
+        public Linker(Options opts)
         {
-            //throw new NotImplementedException();
+            options = opts;
+            objFiles = new List<Win32Obj>();
+            exefile = null;
+
+            sections = new List<Section>();
+            sections.Add(new Section(".text"));
+            sections.Add(new Section(".data"));
+            sections.Add(new Section(".rdata"));
+            sections.Add(new Section(".bss"));
+            sections.Add(new Section(".idata"));
+            sections.Add(new Section(".edata"));
+        }
+
+        public void loadObjectFiles(List<string> filenames)
+        {
+            foreach (String fname in filenames)
+            {
+                Win32Obj objFile = new Win32Obj(fname);
+                if (objFile != null)
+                {
+                    objFiles.Add(objFile);
+                }
+            }
         }
 
         public void link()
@@ -40,7 +67,7 @@ namespace Origami.Link32
 
         public void writeExecutableFile(String exename)
         {
-            Win32Exe exefile = new Win32Exe();
+            exefile = new Win32Exe();
             exefile.layoutImage();
             exefile.writeFile(exename);
         }

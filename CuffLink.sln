@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CuffLink", "CuffLink\CuffLink.csproj", "{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CuffLinkJr", "CuffLinkJr\CuffLinkJr.csproj", "{A342E25C-A86B-4E7D-9B78-2FFA42AC6F68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}.Debug|x86.Build.0 = Debug|x86
 		{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}.Release|x86.ActiveCfg = Release|x86
 		{0CEC3952-D1DD-4861-BFFB-AB2DD1CEBC06}.Release|x86.Build.0 = Release|x86
+		{A342E25C-A86B-4E7D-9B78-2FFA42AC6F68}.Debug|x86.ActiveCfg = Debug|x86
+		{A342E25C-A86B-4E7D-9B78-2FFA42AC6F68}.Debug|x86.Build.0 = Debug|x86
+		{A342E25C-A86B-4E7D-9B78-2FFA42AC6F68}.Release|x86.ActiveCfg = Release|x86
+		{A342E25C-A86B-4E7D-9B78-2FFA42AC6F68}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

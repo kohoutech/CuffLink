@@ -114,12 +114,5 @@ namespace CuffLink
                 }
             }
         }
-
-        //---------------------------------------------------------------------
-
-        public void setLinkerOptions(Origami.Link32.Linker linker)
-        {
-            //throw new NotImplementedException();
-        }
     }
 }

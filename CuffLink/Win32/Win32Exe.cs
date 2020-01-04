@@ -370,7 +370,7 @@ namespace Origami.Win32
                 dosHeader.signature = source.getTwo();
                 if (dosHeader.signature != 0x5a4d)
                 {
-                    throw new Win32ReadException("this is not a valid win32 executable file");
+                    throw new Win32FormatException("this is not a valid win32 executable file");
                 }
 
                 dosHeader.lastsize = source.getTwo();
@@ -454,6 +454,16 @@ namespace Origami.Win32
             {
                 outfile.putTwo(symTablePtr);
                 outfile.putTwo(symTableCount);
+            }
+        }
+
+        //- error handling ------------------------------------------------------------
+
+        class Win32FormatException : Exception
+        {
+            public Win32FormatException(string message)
+                : base(message)
+            {
             }
         }
 }
