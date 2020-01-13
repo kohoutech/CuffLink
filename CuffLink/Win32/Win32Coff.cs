@@ -144,21 +144,21 @@ namespace Origami.Win32
             outfile.putTwo((uint)characteristics);
         }
 
-        public void writeSectionTable(OutputFile outfile)
-        {
-            for (int i = 0; i < sections.Count; i++)
-            {
-                sections[i].writeSectionTblEntry(outfile);
-            }
-        }
+        //public void writeSectionTable(OutputFile outfile)
+        //{
+        //    for (int i = 0; i < sections.Count; i++)
+        //    {
+        //        sections[i].writeSectionTblEntry(outfile);
+        //    }
+        //}
 
-        public void writeSectionData(OutputFile outfile)
-        {
-            for (int i = 0; i < sections.Count; i++)
-            {
-                sections[i].writeSectionData(outfile);
-            }
-        }
+        //public void writeSectionData(OutputFile outfile)
+        //{
+        //    for (int i = 0; i < sections.Count; i++)
+        //    {
+        //        sections[i].writeSectionData(outfile);
+        //    }
+        //}
 
         public void writeSymbolTable(OutputFile outfile)
         {

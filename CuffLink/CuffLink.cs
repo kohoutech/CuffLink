@@ -30,7 +30,7 @@ namespace CuffLink
         {
             Options options = new Options(args);                //parse the cmd line args
 
-            Linker linker = new Linker(options);                       //create a linker
+            Linker linker = new Linker(options);                //create a linker
             
             linker.loadObjectFiles(options.objfiles);           //load the source files
             linker.link();                                      //link them together
