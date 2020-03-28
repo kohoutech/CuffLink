@@ -1,6 +1,6 @@
 ﻿/* ----------------------------------------------------------------------------
 Origami Win32 Library
-Copyright (C) 1998-2019  George E Greaney
+Copyright (C) 1998-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@ using System.IO;
 namespace Origami.Win32
 {
 
-//- reading in ----------------------------------------------------------------
+    //- reading in ----------------------------------------------------------------
 
     public class SourceFile
     {
@@ -34,7 +34,7 @@ namespace Origami.Win32
         byte[] srcbuf;
         uint srclen;
         uint srcpos;
-
+        
         //for reading fields from a disk file
         public SourceFile(String _filename)
         {
@@ -126,12 +126,12 @@ namespace Origami.Win32
         }
     }
 
-//- writing out ---------------------------------------------------------------
+    //- writing out ---------------------------------------------------------------
 
     public class OutputFile
     {
-        uint INITIAL_SIZE = 0x200;
-        uint SIZE_DELTA = 0x2000;
+        static uint INITIAL_SIZE = 0x200;
+        static uint SIZE_DELTA = 0x2000;
 
         String filename;
         byte[] outbuf;
@@ -141,9 +141,14 @@ namespace Origami.Win32
 
         //for writing fields to a disk file
         public OutputFile(String _filename)
+            : this(_filename, INITIAL_SIZE)
+        {
+        }
+
+        public OutputFile(String _filename, uint filelen)
         {
             filename = _filename;
-            outlen = INITIAL_SIZE;
+            outlen = filelen;
             outbuf = new byte[outlen];
             outpos = 0;
             maxlen = 0;
@@ -184,13 +189,13 @@ namespace Origami.Win32
         public void putFour(uint val)
         {
             checkSpace(4);
-            byte d = (byte)(val % 0x100);
-            val /= 0x100;
-            byte c = (byte)(val % 0x100);
+            byte a = (byte)(val % 0x100);
             val /= 0x100;
             byte b = (byte)(val % 0x100);
             val /= 0x100;
-            byte a = (byte)(val % 0x100);
+            byte c = (byte)(val % 0x100);
+            val /= 0x100;
+            byte d = (byte)(val % 0x100);
             outbuf[outpos++] = a;
             outbuf[outpos++] = b;
             outbuf[outpos++] = c;
@@ -250,6 +255,14 @@ namespace Origami.Win32
 
         public void writeOut()
         {
+            //remove unused space at end of file
+            //any padding needed at end of file should be handled by caller
+            if (outpos < outbuf.Length)
+            {
+                byte[] newbuf = new byte[outpos];
+                Array.Copy(outbuf, newbuf, outpos);
+                outbuf = newbuf;
+            }
             File.WriteAllBytes(filename, outbuf);
         }
     }

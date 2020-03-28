@@ -1,6 +1,6 @@
 ﻿/* ----------------------------------------------------------------------------
 Cufflink - an COFF object file linker
-Copyright (C) 1997-2019  George E Greaney
+Copyright (C) 1997-2010  George E Greaney
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,11 +27,8 @@ namespace CuffLink
 {
     public class Options
     {
-        public List<String> infilenames;
-
         public List<String> searchPaths;
         public List<String> objfiles;
-
         public String exename;
 
         public Options(string[] cmdArgs)
@@ -57,13 +54,14 @@ namespace CuffLink
             //now parse all options & filenames
             parseOptions(args);
 
-            exename = "test.exe";
         }
 
         public void setDefaultValues()
         {
-            infilenames = new List<string>();
             searchPaths = new List<string>();
+            objfiles = new List<string>();
+            objfiles.Add("test3.obj");
+            exename = "test3.dll";
         }
 
         public List<String> parseResponseFile(String filename)
@@ -110,7 +108,7 @@ namespace CuffLink
                 }
                 else
                 {
-                    infilenames.Add(args[i]);
+                    objfiles.Add(args[i]);
                 }
             }
         }

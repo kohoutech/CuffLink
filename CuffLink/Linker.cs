@@ -1,6 +1,6 @@
 ﻿/* ----------------------------------------------------------------------------
 Origami Lin32 Library
-Copyright (C) 1997-2019  George E Greaney
+Copyright (C) 1997-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,14 +29,14 @@ namespace CuffLink
     public class Linker
     {
         Options options;
-        List<Win32Obj> objFiles;
+        List<Win32Coff> objFiles;
         Win32Exe exefile;
         List<Section> sections;
 
         public Linker(Options opts)
         {
             options = opts;
-            objFiles = new List<Win32Obj>();
+            objFiles = new List<Win32Coff>();
             exefile = null;
 
             sections = new List<Section>();
@@ -52,7 +52,7 @@ namespace CuffLink
         {
             foreach (String fname in filenames)
             {
-                Win32Obj objFile = new Win32Obj(fname);
+                Win32Coff objFile = Win32Coff.readFromFile(fname);
                 if (objFile != null)
                 {
                     objFiles.Add(objFile);

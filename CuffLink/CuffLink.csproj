@@ -53,8 +53,8 @@
     <Compile Include="Win32\ImportTable.cs" />
     <Compile Include="Win32\ResourceTable.cs" />
     <Compile Include="Win32\Section.cs" />
+    <Compile Include="Win32\Win32Coff.cs" />
     <Compile Include="Win32\Win32Exe.cs" />
-    <Compile Include="Win32\Win32Obj.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Link32\" />
