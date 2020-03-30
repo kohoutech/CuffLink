@@ -1,6 +1,6 @@
 ﻿/* ----------------------------------------------------------------------------
 Origami Win32 Library
-Copyright (C) 1998-2019  George E Greaney
+Copyright (C) 1998-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,13 +31,12 @@ namespace Origami.Win32
     public class Win32Exe
     {
         public String filename;
+        public bool isDLL;
 
         public MsDosHeader dosHeader;
 
-        const int IMAGE_FILE_MACHINE_I386 = 0x14c;
-
         //coff header fields
-        public uint machine;
+        public MachineType machine;
         public uint timeStamp;
         public uint characteristics;
 
@@ -94,25 +93,24 @@ namespace Origami.Win32
         public List<Section> sections;
 
         //standard sections
-        public ExportTable exportTable;
         public ImportTable importTable;
+        public ExportTable exportTable;
         public ResourceTable resourceTable;
-
-        public SymbolTable symbolTable;
 
         public Win32Exe()
         {
             filename = null;
+            isDLL = false;
 
             dosHeader = null;
 
             //coff header fields
-            machine = IMAGE_FILE_MACHINE_I386;
+            machine = MachineType.IMAGE_FILE_MACHINE_I386;
             timeStamp = 0;
             characteristics = 0;
 
             //optional header fields
-            magicNum = 0;
+            magicNum = 0x010b;                  //PE32 executable
             majorLinkerVersion = 0;
             minorLinkerVersion = 0;
             sizeOfCode = 0;
@@ -130,7 +128,7 @@ namespace Origami.Win32
             minorImageVersion = 0;
             majorSubsystemVersion = 0;
             minorSubsystemVersion = 0;
-            win32VersionValue = 0;
+            win32VersionValue = 0;                   //reserved, must be zero
             sizeOfImage = 0;
             sizeOfHeaders = 0;
             checksum = 0;
@@ -140,8 +138,8 @@ namespace Origami.Win32
             sizeOfStackCommit = 0;
             sizeOfHeapReserve = 0;
             sizeOfHeapCommit = 0;
-            loaderFlags = 0;
-            numberOfRvaAndSizes = 0;
+            loaderFlags = 0;                        //reserved, must be zero
+            numberOfRvaAndSizes = 0x10;             //"not fixed" but the PE format spec only defines 16 of these
 
             //data directory
             dExportTable = null;
@@ -167,8 +165,6 @@ namespace Origami.Win32
             exportTable = null;
             importTable = null;
             resourceTable = null;
-
-            symbolTable = new SymbolTable();
         }
 
 //- reading in ----------------------------------------------------------------
@@ -268,17 +264,86 @@ namespace Origami.Win32
 
 //- writing out ----------------------------------------------------------------
 
-        public void layoutImage()
+        public void buildSectionTable()
         {
-            dosHeader = new MsDosHeader();
-            dosHeader.e_lfanew = 0x80;
+            
+        }
+
+        public void writeCoffHeader(OutputFile outfile)
+        {
+            outfile.putFour(0x00004550);            //PE sig
+            //outfile.putTwo(machine);
+            outfile.putTwo((uint)sections.Count);
+            outfile.putFour(timeStamp);
+            //symbolTable.writeHeader(outfile);
+            outfile.putTwo(0xe0);
+            outfile.putTwo(characteristics);
+        }
+
+        private void writeOptionalHeader(OutputFile outfile)
+        {
+
+        }
+
+        private void writeSectionTable(OutputFile outfile)
+        {
+
+        }
+
+        private void writeSectionData(OutputFile outfile)
+        {
+
         }
 
         public void writeFile(String filename)
         {
+            //build standard sections
+            int importSecNum = -1;
+            if (importTable != null)
+            {
+                importSecNum = sections.Count;
+                Section importSection = importTable.createSection();
+                sections.Add(importSection);
+            }
+
+            int exportSecNum = -1;
+            if (exportTable != null)
+            {
+                exportSecNum = sections.Count;
+                Section exportSection = exportTable.createSection();
+                sections.Add(exportSection);
+            }
+
+            int resourceSecNum = -1;
+            if (resourceTable != null)
+            {
+                resourceSecNum = sections.Count;
+                Section resourceSection = resourceTable.createSection();
+                sections.Add(resourceSection);
+            }
+
+            //build dos header
+            if (dosHeader == null)
+            {
+                dosHeader = new MsDosHeader();
+            }
+            uint winHdrPos = (((dosHeader.hdrsize + 7)/8)*8);
+            dosHeader.e_lfanew = winHdrPos;
+
+            //win hdr fields
+            characteristics = 0x102;        //IMAGE_FILE_EXECUTABLE_IMAGE | IMAGE_FILE_32BIT_MACHINE
+            if (isDLL)
+            {
+                characteristics |= 0x2000;      //IMAGE_FILE_DLL
+            }
+
+            sizeOfHeaders = winHdrPos + 0x18 + 0xe0 + (uint)(sections.Count * 0x28);
+
+            buildSectionTable();
+
             OutputFile outfile = new OutputFile(filename);
             dosHeader.writeOut(outfile);
-            outfile.putZeros(0x80 - 0x40);
+            outfile.putZeros(winHdrPos - dosHeader.hdrsize);
 
             writeCoffHeader(outfile);
             writeOptionalHeader(outfile);
@@ -288,31 +353,6 @@ namespace Origami.Win32
             outfile.writeOut();
         }
 
-        public void writeCoffHeader(OutputFile outfile)
-        {
-            outfile.putFour(0x00004550);            //PE sig
-            outfile.putTwo(machine);
-            outfile.putTwo((uint)sections.Count);
-            outfile.putFour(timeStamp);
-            symbolTable.writeHeader(outfile);
-            outfile.putTwo(0xe0);
-            outfile.putTwo(characteristics);
-        }
-
-        private void writeOptionalHeader(OutputFile outfile)
-        {
-            
-        }
-
-        private void writeSectionTable(OutputFile outfile)
-        {
-            
-        }
-
-        private void writeSectionData(OutputFile outfile)
-        {
-            
-        }
     }
 
 //- ms dos header -------------------------------------------------------------
@@ -440,20 +480,6 @@ namespace Origami.Win32
                 uint rva = source.getFour();
                 uint size = source.getFour();
                 return new DataDirectory(rva, size);
-            }
-        }
-
-//- symbol tbl ------------------------------------------------------------
-
-        public class SymbolTable
-        {
-            public uint symTablePtr;
-            public uint symTableCount;
-
-            public void writeHeader(OutputFile outfile)
-            {
-                outfile.putTwo(symTablePtr);
-                outfile.putTwo(symTableCount);
             }
         }
 

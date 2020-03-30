@@ -68,7 +68,6 @@ namespace CuffLink
         public void writeExecutableFile(String exename)
         {
             exefile = new Win32Exe();
-            exefile.layoutImage();
             exefile.writeFile(exename);
         }
     }
