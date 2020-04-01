@@ -189,11 +189,14 @@ namespace Origami.Win32
 
         public void writeSectionData(OutputFile outfile)
         {
+            uint pos = outfile.getPos();
             outfile.putRange(data.ToArray());
 
             //these get written directly after the section data
             CoffRelocation.write(outfile, relocTblPos);
             CoffLineNumber.write(outfile);
+            uint padding = fileSize - (outfile.getPos() - pos);
+            outfile.putZeros(padding);
         }
     }
 
