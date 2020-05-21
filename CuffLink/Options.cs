@@ -34,7 +34,8 @@ namespace CuffLink
         public Options(string[] cmdArgs)
         {
 
-            setDefaultValues();
+            searchPaths = new List<string>();
+            objfiles = new List<string>();
 
             //first merge any response file contents into arg list
             List<String> args = new List<string>();
@@ -54,14 +55,6 @@ namespace CuffLink
             //now parse all options & filenames
             parseOptions(args);
 
-        }
-
-        public void setDefaultValues()
-        {
-            searchPaths = new List<string>();
-            objfiles = new List<string>();
-            objfiles.Add("test3.obj");
-            exename = "test3.dll";
         }
 
         public List<String> parseResponseFile(String filename)
@@ -89,8 +82,7 @@ namespace CuffLink
                     {
                         switch (arg[0])
                         {
-                            case 'I':
-                                {
+                            case 'I':                                
                                     String path = null;
                                     if (arg.Length > 1)
                                     {
@@ -102,7 +94,14 @@ namespace CuffLink
                                     }
                                     searchPaths.Add(path);
                                     break;
-                                }
+                                
+
+                            case 'o':
+                                exename = args[++i];
+                                break;
+
+                            default:
+                                break;
                         }
                     }
                 }
@@ -114,3 +113,4 @@ namespace CuffLink
         }
     }
 }
+
