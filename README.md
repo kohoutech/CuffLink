@@ -1,2 +1,3 @@
-# Cufflink
-a COFF object file linker
+# Welder
+
+an object file linker
