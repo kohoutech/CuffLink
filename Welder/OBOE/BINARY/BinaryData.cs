@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Kohoutech Win32 Library
+Kohoutech Binary Library
 Copyright (C) 1998-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -23,20 +23,22 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace Kohoutech.Win32
+namespace Kohoutech.Binary
 {
 
-    //- reading in ----------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // READING IN
+    //---------------------------------------------------------------------
 
-    public class SourceFile
+    public class BinaryIn
     {
         String filename;
         byte[] srcbuf;
         uint srclen;
         uint srcpos;
-        
+
         //for reading fields from a disk file
-        public SourceFile(String _filename)
+        public BinaryIn(String _filename)
         {
             filename = _filename;
             srcbuf = File.ReadAllBytes(filename);
@@ -44,8 +46,7 @@ namespace Kohoutech.Win32
             srcpos = 0;
         }
 
-        //for reading fields from a data buf
-        public SourceFile(byte[] data)
+        public BinaryIn(byte[] data)
         {
             filename = null;
             srcbuf = data;
@@ -73,6 +74,7 @@ namespace Kohoutech.Win32
             return result;
         }
 
+        //little endian unsigned int values
         public uint getOne()
         {
             byte a = srcbuf[srcpos++];
@@ -115,6 +117,19 @@ namespace Kohoutech.Win32
             return result;
         }
 
+        //C style string
+        public String getAsciiZString()
+        {
+            String result = "";
+            byte a = srcbuf[srcpos++];
+            while (a != '\0')
+            {
+                result = result + (char)a;
+                a = srcbuf[srcpos++];
+            }
+            return result;
+        }
+
         public void skip(uint delta)
         {
             srcpos += delta;
@@ -126,9 +141,11 @@ namespace Kohoutech.Win32
         }
     }
 
-    //- writing out ---------------------------------------------------------------
+    //---------------------------------------------------------------------
+    // WRITING OUT
+    //---------------------------------------------------------------------
 
-    public class OutputFile
+    public class BinaryOut
     {
         static uint INITIAL_SIZE = 0x200;
         static uint SIZE_DELTA = 0x2000;
@@ -139,13 +156,18 @@ namespace Kohoutech.Win32
         uint outpos;
         uint maxlen;
 
+        //for write fields to a data buf
+        public BinaryOut() : this(null)
+        {
+        }
+
         //for writing fields to a disk file
-        public OutputFile(String _filename)
+        public BinaryOut(String _filename)
             : this(_filename, INITIAL_SIZE)
         {
         }
 
-        public OutputFile(String _filename, uint filelen)
+        public BinaryOut(String _filename, uint filelen)
         {
             filename = _filename;
             outlen = filelen;
@@ -159,6 +181,7 @@ namespace Kohoutech.Win32
             return outpos;
         }
 
+        //grow the outbuf as needed
         public void checkSpace(uint size)
         {
             uint needed = outpos + size;
@@ -168,8 +191,13 @@ namespace Kohoutech.Win32
                 outbuf.CopyTo(temp, 0);
                 outbuf = temp;
             }
+            if (needed > maxlen)
+            {
+                maxlen = needed;
+            }
         }
 
+        //little endian unsigned int values
         public void putOne(uint val)
         {
             checkSpace(1);
@@ -238,6 +266,7 @@ namespace Kohoutech.Win32
             outpos += len;
         }
 
+        //padding out data fields
         public void putZeros(uint len)
         {
             checkSpace(len);
@@ -247,23 +276,37 @@ namespace Kohoutech.Win32
             }
         }
 
+        public void skip(uint delta)
+        {
+            uint newpos = outpos + delta;
+            seek(newpos);
+        }
+
         public void seek(uint pos)
         {
-            checkSpace(pos - outpos);
+            if (pos > outpos)                   //if we are seeking beyond the cur pos in the output buf
+            {
+                checkSpace(pos - outpos);
+            }
             outpos = pos;
+        }
+
+        public byte[] getData()
+        {
+            //remove unused space at end of file
+            //any padding needed at end of file should be already handled by caller
+            if (maxlen < outbuf.Length)
+            {
+                byte[] newbuf = new byte[maxlen];
+                Array.Copy(outbuf, newbuf, maxlen);
+                outbuf = newbuf;
+            }
+            return outbuf;
         }
 
         public void writeOut()
         {
-            //remove unused space at end of file
-            //any padding needed at end of file should be handled by caller
-            if (outpos < outbuf.Length)
-            {
-                byte[] newbuf = new byte[outpos];
-                Array.Copy(outbuf, newbuf, outpos);
-                outbuf = newbuf;
-            }
-            File.WriteAllBytes(filename, outbuf);
+            File.WriteAllBytes(filename, getData());
         }
     }
 }

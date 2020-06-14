@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Origami Kohoutech Library
+Kohoutech OBOE Library
 Copyright (C) 1998-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -20,15 +20,44 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
+using System.IO;
 
-namespace Kohoutech.Win32
+using Kohoutech.Binary;
+
+namespace Kohoutech.OBOE
 {
-    public class ImportTable
+    //section base class
+    public class Section
     {
-        internal Section createSection()
+        public int num;             //section's pos in the section table
+        public string name;
+        public uint sectype;
+        public uint addr;           //for storage & linkage
+        public uint size;
+
+        //cons
+        public Section(string _name, uint _sectype)
         {
-            throw new NotImplementedException();
+            num = 0;
+            name = _name;
+            sectype = _sectype;
+            addr = 0;
+            size = 0;
+        }
+
+        public virtual void writeOut(BinaryOut outfile)
+        {
+            outfile.putString(name);            
+        }
+
+        public virtual void dumpSection(StreamWriter txtout)
+        {
+            txtout.WriteLine("SECTION {0}", num);
+            txtout.WriteLine("name: {0}", name);
+            txtout.WriteLine("section type: {0}", sectype);
+            txtout.WriteLine("-------");
         }
     }
 }
