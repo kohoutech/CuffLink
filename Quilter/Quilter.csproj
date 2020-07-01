@@ -49,12 +49,12 @@
     <Compile Include="OBOE\ImportEntry.cs" />
     <Compile Include="OBOE\Oboe.cs" />
     <Compile Include="OBOE\OboeBlock.cs" />
-    <Compile Include="OBOE\ResourceTable.cs" />
     <Compile Include="OBOE\Section.cs" />
+    <Compile Include="OBOE\Win32\CoffResource.cs" />
     <Compile Include="OBOE\Win32\CoffSection.cs" />
     <Compile Include="OBOE\Win32\Win32Exe.cs" />
     <Compile Include="OBOE\Win32\Win32Obj.cs" />
-    <Compile Include="Welder.cs" />
+    <Compile Include="Quilter.cs" />
     <Compile Include="Linker\Linker.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

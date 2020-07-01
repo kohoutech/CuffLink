@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Cufflink - an COFF object file linker
+Quilter - an object file linker
 Copyright (C) 1997-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -23,7 +23,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 
-namespace CuffLink
+namespace Quilter
 {
     public class Options
     {

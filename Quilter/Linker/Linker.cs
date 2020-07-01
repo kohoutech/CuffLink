@@ -1,5 +1,5 @@
 ﻿/* ----------------------------------------------------------------------------
-Origami Lin32 Library
+Quilter - an object file linker
 Copyright (C) 1997-2020  George E Greaney
 
 This program is free software; you can redistribute it and/or
@@ -22,37 +22,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Origami.Win32;
+using Kohoutech.OBOE;
 
-namespace CuffLink
+namespace Quilter
 {
     public class Linker
     {
         Options options;
-        List<Win32Coff> objFiles;
+        List<Oboe> objFiles;
         Win32Exe exefile;
         List<Section> sections;
 
         public Linker(Options opts)
         {
             options = opts;
-            objFiles = new List<Win32Coff>();
+            objFiles = new List<Oboe>();
             exefile = null;
 
             sections = new List<Section>();
-            sections.Add(new Section(".text"));
-            sections.Add(new Section(".data"));
-            sections.Add(new Section(".rdata"));
-            sections.Add(new Section(".bss"));
-            sections.Add(new Section(".idata"));
-            sections.Add(new Section(".edata"));
+            //sections.Add(new Section(".text"));
+            //sections.Add(new Section(".data"));
+            //sections.Add(new Section(".rdata"));
+            //sections.Add(new Section(".bss"));
+            //sections.Add(new Section(".idata"));
+            //sections.Add(new Section(".edata"));
         }
 
         public void loadObjectFiles(List<string> filenames)
         {
             foreach (String fname in filenames)
             {
-                Win32Coff objFile = Win32Coff.readFromFile(fname);
+                Oboe objFile = Oboe.loadFromFile(fname);
                 if (objFile != null)
                 {
                     objFiles.Add(objFile);
@@ -62,13 +62,20 @@ namespace CuffLink
 
         public void link()
         {
-            //throw new NotImplementedException();
+            //debugging
+            foreach (Oboe obj in objFiles)
+            {
+                sections.AddRange(obj.sections);
+            }
         }
 
         public void writeExecutableFile(String exename)
         {
-            exefile = new Win32Exe();
-            exefile.writeFile(exename);
+            //exefile = new Win32Exe();
+            //exefile.sections.AddRange(sections);
+            //exefile.writeFile(exename);
         }
     }
 }
+
+//Console.Out.WriteLine("There's no sun in the shdow of the wizard");
